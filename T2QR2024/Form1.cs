@@ -48,26 +48,46 @@ namespace T2QR2024
 					}
 				}
 
-				// 改行、タブ、句点、コンマで分割
-				var delimiters = new string[] { "\r\n", "\r", "\n" };
-
-				if (text.Length <= MaxQRCodeByteSize)
-				{
-					fileContents.Add(text);
-				}
-				else
-				{
-					var parts = new List<string> { text };
-					foreach (var delimiter in delimiters)
-					{
-						parts = SplitParts(parts, delimiter);
-					}
-					fileContents.AddRange(parts);
-				}
+				ProcessText(text);
 			}
 			currentIndex = 0;
 			DisplayQRCode();
 		}
+
+		private void ProcessText(string text)
+		{
+			// 改行、タブ、句点、コンマで分割
+			var delimiters = new string[] { "\r\n", "\r", "\n" };
+
+			if (text.Length <= MaxQRCodeByteSize)
+			{
+				fileContents.Add(text);
+			}
+			else
+			{
+				var parts = new List<string> { text };
+				foreach (var delimiter in delimiters)
+				{
+					parts = SplitParts(parts, delimiter);
+				}
+				fileContents.AddRange(parts);
+			}
+		}
+
+		protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+		{
+			// Ctrl+Vを押したとき
+			if (keyData == (Keys.Control | Keys.V))
+			{
+				string clipboardText = Clipboard.GetText();
+				ProcessText(clipboardText);
+				currentIndex = 0;
+				DisplayQRCode();
+				return true;
+			}
+			return base.ProcessCmdKey(ref msg, keyData);
+		}
+
 
 		private List<string> SplitParts(List<string> parts, string delimiter)
 		{
@@ -78,7 +98,7 @@ namespace T2QR2024
 				foreach (var splitPart in splitParts)
 				{
 					var trimmedPart = splitPart.Trim();
-					if (trimmedPart.Length > 0)
+					if (0 < trimmedPart.Length)
 					{
 						var encodedPart = Encoding.UTF8.GetBytes(trimmedPart);
 						if (encodedPart.Length <= MaxQRCodeByteSize)
@@ -98,7 +118,7 @@ namespace T2QR2024
 								}
 								sb.Append(ch);
 							}
-							if (sb.Length > 0)
+							if (0 < sb.Length)
 							{
 								newParts.Add(sb.ToString());
 							}

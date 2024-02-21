@@ -193,5 +193,9 @@ namespace T2QR2024
 			// Formのタイトルに現在の表示枚数と分割状態を表示
 			this.Text = $"{currentIndex + 1}/{fileContents.Count}";
 		}
+
+		private void QrButton_Click(object sender, EventArgs e) => QrImagePanel.Visible = true;
+
+		private void OKButton_Click(object sender, EventArgs e) => QrImagePanel.Visible = false;
 	}
 }

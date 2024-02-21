@@ -15,6 +15,29 @@ namespace T2QR2024
 		{
 			InitializeComponent();
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+			// アプリケーションの起動引数をチェックします。
+			string[] args = Environment.GetCommandLineArgs();
+			if (1 < args.Length)
+			{
+				// 最初の引数は常にアプリケーションのパスなので、それを無視します。
+				string filePaths = string.Join(" ", args.Skip(1));
+				ProcessFile(filePaths);
+			}
+		}
+
+		private void ProcessFile(string filePath)
+		{
+			// ファイルからテキストを読み込む
+			string text;
+			using (var fs = File.OpenRead(filePath))
+			{
+				text = ReadTextWithEncodingDetection(filePath, fs);
+			}
+
+			ProcessText(text);
+			currentIndex = 0;
+			DisplayQRCode();
 		}
 
 		private void Form1_DragEnter(object sender, DragEventArgs e)

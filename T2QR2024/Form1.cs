@@ -19,36 +19,59 @@ namespace T2QR2024
 
 		private void Form1_DragEnter(object sender, DragEventArgs e)
 		{
-			if (e.Data.GetDataPresent(DataFormats.FileDrop))
+			if (e.Data.GetDataPresent(DataFormats.Text) || e.Data.GetDataPresent(DataFormats.FileDrop))
 				e.Effect = DragDropEffects.Copy;
+		}
+
+		private string ReadTextWithEncodingDetection(string path, Stream stream)
+		{
+			string text;
+			var detector = new CharsetDetector();
+			detector.Feed(stream);
+			detector.DataEnd();
+			if (detector.Charset == null || detector.Charset.ToLower() == "utf-8")
+			{
+				// デフォルトのエンコーディングを使用
+				text = path != null ? File.ReadAllText(path) : Encoding.UTF8.GetString(((MemoryStream)stream).ToArray());
+			}
+			else
+			{
+				var encoding = Encoding.GetEncoding(detector.Charset);
+				text = path != null ? File.ReadAllText(path, encoding) : encoding.GetString(((MemoryStream)stream).ToArray());
+			}
+			return text;
 		}
 
 		private void Form1_DragDrop(object sender, DragEventArgs e)
 		{
-			string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-			fileContents.Clear();
-			foreach (string file in files)
+			if (e.Data.GetDataPresent(DataFormats.Text))
 			{
-				// ファイルからテキストを読み込む
-				string text;
-				using (var fs = File.OpenRead(file))
+				string text = (string)e.Data.GetData(DataFormats.Text);
+
+				// テキストをメモリストリームに変換
+				var bytes = Encoding.UTF8.GetBytes(text);
+				using (var ms = new MemoryStream(bytes))
 				{
-					var detector = new CharsetDetector();
-					detector.Feed(fs);
-					detector.DataEnd();
-					if (detector.Charset != null)
-					{
-						var encoding = Encoding.GetEncoding(detector.Charset);
-						text = File.ReadAllText(file, encoding);
-					}
-					else
-					{
-						// デフォルトのエンコーディングを使用
-						text = File.ReadAllText(file);
-					}
+					text = ReadTextWithEncodingDetection(null, ms);
 				}
 
 				ProcessText(text);
+			}
+			else if (e.Data.GetDataPresent(DataFormats.FileDrop))
+			{
+				string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+				fileContents.Clear();
+				foreach (string file in files)
+				{
+					// ファイルからテキストを読み込む
+					string text;
+					using (var fs = File.OpenRead(file))
+					{
+						text = ReadTextWithEncodingDetection(file, fs);
+					}
+
+					ProcessText(text);
+				}
 			}
 			currentIndex = 0;
 			DisplayQRCode();
@@ -131,6 +154,10 @@ namespace T2QR2024
 
 		private void MainPictureBox_MouseClick(object sender, MouseEventArgs e)
 		{
+			if (fileContents.Count == 0)
+			{
+				return;
+			}
 			currentIndex = (currentIndex + 1) % fileContents.Count;
 			DisplayQRCode();
 		}

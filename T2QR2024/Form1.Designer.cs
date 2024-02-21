@@ -30,12 +30,13 @@
 		{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
 			MainPictureBox = new PictureBox();
+			ReadButton = new Button();
+			ReadResult = new Label();
 			((System.ComponentModel.ISupportInitialize)MainPictureBox).BeginInit();
 			SuspendLayout();
 			// 
 			// MainPictureBox
 			// 
-			MainPictureBox.Dock = DockStyle.Fill;
 			MainPictureBox.Location = new Point(0, 0);
 			MainPictureBox.Name = "MainPictureBox";
 			MainPictureBox.Size = new Size(479, 479);
@@ -46,12 +47,37 @@
 			MainPictureBox.MouseClick += MainPictureBox_MouseClick;
 			MainPictureBox.MouseEnter += MainPictureBox_MouseEnter;
 			// 
+			// ReadButton
+			// 
+			ReadButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+			ReadButton.Font = new Font("Impact", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+			ReadButton.ForeColor = Color.FromArgb(0, 192, 0);
+			ReadButton.Location = new Point(398, 493);
+			ReadButton.Name = "ReadButton";
+			ReadButton.Size = new Size(69, 35);
+			ReadButton.TabIndex = 1;
+			ReadButton.Text = "Read";
+			ReadButton.UseVisualStyleBackColor = true;
+			// 
+			// ReadResult
+			// 
+			ReadResult.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+			ReadResult.AutoSize = true;
+			ReadResult.Font = new Font("メイリオ", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 128);
+			ReadResult.Location = new Point(12, 493);
+			ReadResult.Name = "ReadResult";
+			ReadResult.Size = new Size(44, 20);
+			ReadResult.TabIndex = 2;
+			ReadResult.Text = "result";
+			// 
 			// Form1
 			// 
 			AllowDrop = true;
 			AutoScaleDimensions = new SizeF(7F, 15F);
 			AutoScaleMode = AutoScaleMode.Font;
-			ClientSize = new Size(479, 479);
+			ClientSize = new Size(479, 540);
+			Controls.Add(ReadResult);
+			Controls.Add(ReadButton);
 			Controls.Add(MainPictureBox);
 			Icon = (Icon)resources.GetObject("$this.Icon");
 			Name = "Form1";
@@ -60,10 +86,13 @@
 			DragEnter += Form1_DragEnter;
 			((System.ComponentModel.ISupportInitialize)MainPictureBox).EndInit();
 			ResumeLayout(false);
+			PerformLayout();
 		}
 
 		#endregion
 
 		private PictureBox MainPictureBox;
+		private Button ReadButton;
+		private Label ReadResult;
 	}
 }

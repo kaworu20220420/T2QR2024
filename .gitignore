@@ -367,3 +367,5 @@ FodyWeavers.xsd
 *.db-wal
 /wwwroot/images/drawable.lnk
 /wwwroot/userImages/*
+/kaworu20220420-T2QR2024.url
+/qricon.png

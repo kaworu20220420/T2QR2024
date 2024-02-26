@@ -1,6 +1,12 @@
 using QRCoder;
 using System.Text;
+using System.Windows.Forms;
 using Ude;
+using System;
+using System.Drawing;
+using AForge.Video;
+using AForge.Video.DirectShow;
+using ZXing;
 
 namespace T2QR2024
 {
@@ -220,5 +226,44 @@ namespace T2QR2024
 		private void QrButton_Click(object sender, EventArgs e) => QrImagePanel.Visible = true;
 
 		private void OKButton_Click(object sender, EventArgs e) => QrImagePanel.Visible = false;
+
+		private FilterInfoCollection CaptureDevice;
+		private VideoCaptureDevice FinalFrame;
+
+		private void MainForm_Load(object sender, EventArgs e)
+		{
+			CaptureDevice = new FilterInfoCollection(FilterCategory.VideoInputDevice);
+			FinalFrame = new VideoCaptureDevice();
+		}
+
+		private void ReadButton_Click(object sender, EventArgs e)
+		{
+			FinalFrame = new VideoCaptureDevice(CaptureDevice[0].MonikerString);
+			FinalFrame.NewFrame += new NewFrameEventHandler(FinalFrame_NewFrame);
+			FinalFrame.Start();
+		}
+
+		void FinalFrame_NewFrame(object sender, NewFrameEventArgs eventArgs)
+		{
+			QrPictureBox.Image = (Bitmap)eventArgs.Frame.Clone();
+			var reader = new ZXing.BarcodeReader<Bitmap>(bitmap => new ZXing.Windows.Compatibility.BitmapLuminanceSource(bitmap));
+			var result = reader.Decode((Bitmap)QrPictureBox.Image);
+			if (result == null)
+			{
+				return;
+			}
+			ReadResult.Text = result.BarcodeFormat.ToString() + Environment.NewLine;
+			ReadResult.Text += result.Text;
+		}
+
+		private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+		{
+			if (FinalFrame.IsRunning == true) FinalFrame.Stop();
+		}
+
+		private void ReadResult_Click(object sender, EventArgs e)
+		{
+			Clipboard.SetText(ReadResult.Text);
+		}
 	}
 }

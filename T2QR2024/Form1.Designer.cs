@@ -64,7 +64,7 @@
 			ReadButton.TabIndex = 1;
 			ReadButton.Text = "Read";
 			ReadButton.UseVisualStyleBackColor = true;
-			ReadButton.Visible = false;
+			ReadButton.Click += ReadButton_Click;
 			// 
 			// ReadResult
 			// 
@@ -76,7 +76,7 @@
 			ReadResult.Size = new Size(44, 20);
 			ReadResult.TabIndex = 2;
 			ReadResult.Text = "result";
-			ReadResult.Visible = false;
+			ReadResult.Click += ReadResult_Click;
 			// 
 			// QrButton
 			// 

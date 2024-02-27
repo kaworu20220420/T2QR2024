@@ -139,6 +139,7 @@
 			Icon = (Icon)resources.GetObject("$this.Icon");
 			Name = "Form1";
 			Text = "Form1";
+			Load += MainForm_Load;
 			DragDrop += Form1_DragDrop;
 			DragEnter += Form1_DragEnter;
 			((System.ComponentModel.ISupportInitialize)MainPictureBox).EndInit();

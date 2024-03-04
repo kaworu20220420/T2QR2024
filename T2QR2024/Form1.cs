@@ -1,12 +1,8 @@
-using QRCoder;
-using System.Text;
-using System.Windows.Forms;
-using Ude;
-using System;
-using System.Drawing;
 using AForge.Video;
 using AForge.Video.DirectShow;
-using ZXing;
+using QRCoder;
+using System.Text;
+using Ude;
 
 namespace T2QR2024
 {
@@ -137,6 +133,12 @@ namespace T2QR2024
 				DisplayQRCode();
 				return true;
 			}
+			// Ctrl+5を押したとき
+			else if (keyData == (Keys.Control | Keys.D5))
+			{
+				DisplayQRCode(211,11,11);
+				return true;
+			}
 			return base.ProcessCmdKey(ref msg, keyData);
 		}
 
@@ -200,7 +202,7 @@ namespace T2QR2024
 			toolTip.SetToolTip(MainPictureBox, fileContents[currentIndex]);
 		}
 
-		private void DisplayQRCode()
+		private void DisplayQRCode(int r=0, int g=0, int b=0)
 		{
 			string text = fileContents[currentIndex];
 			if (Encoding.UTF8.GetByteCount(text) <= MaxQRCodeByteSize)
@@ -208,7 +210,9 @@ namespace T2QR2024
 				QRCodeGenerator qrGenerator = new QRCodeGenerator();
 				QRCodeData qrCodeData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q);
 				QRCode qrCode = new QRCode(qrCodeData);
-				Bitmap qrCodeImage = qrCode.GetGraphic(20);
+				Color darkColor = Color.FromArgb(r, g, b); // Dark color
+				Color lightColor = Color.White; // Light color
+				Bitmap qrCodeImage = qrCode.GetGraphic(20, darkColor, lightColor, true);
 
 				// PictureBoxのサイズに合わせてQRコードのイメージを縮小
 				MainPictureBox.SizeMode = PictureBoxSizeMode.Zoom;
@@ -233,6 +237,12 @@ namespace T2QR2024
 		private void MainForm_Load(object sender, EventArgs e)
 		{
 			CaptureDevice = new FilterInfoCollection(FilterCategory.VideoInputDevice);
+			if (CaptureDevice == null || CaptureDevice.Count==0)
+			{
+				ReadButton.Visible = false;
+				ReadResult.Visible = false;
+				return;
+			}
 			FinalFrame = new VideoCaptureDevice();
 		}
 
@@ -250,6 +260,7 @@ namespace T2QR2024
 			var result = reader.Decode((Bitmap)QrPictureBox.Image);
 			if (result == null)
 			{
+				ReadResult.Text = "no qr data";
 				return;
 			}
 			ReadResult.Text = result.BarcodeFormat.ToString() + Environment.NewLine;
@@ -258,7 +269,7 @@ namespace T2QR2024
 
 		private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
 		{
-			if (FinalFrame.IsRunning == true) FinalFrame.Stop();
+			if (FinalFrame.IsRunning) FinalFrame.Stop();
 		}
 
 		private void ReadResult_Click(object sender, EventArgs e)

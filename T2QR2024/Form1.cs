@@ -88,19 +88,32 @@ namespace T2QR2024
 				fileContents.Clear();
 				foreach (string file in files)
 				{
-					// ファイルからテキストを読み込む
-					string text;
-					using (var fs = File.OpenRead(file))
+					if (File.GetAttributes(file).HasFlag(FileAttributes.Directory))
 					{
-						text = ReadTextWithEncodingDetection(file, fs);
+						// フォルダをドロップした場合、その中のすべてのファイルとサブフォルダのリストを作成
+						var text = string.Join(Environment.NewLine,
+							Directory.GetDirectories(file, "*.*", SearchOption.AllDirectories)
+							.SelectMany(dir => new[] { "■" + Path.GetRelativePath(file, dir) }
+							.Concat(Directory.GetFiles(dir).Select(f => Path.GetRelativePath(dir, f)))));
+						ProcessText(text);
 					}
+					else
+					{
+						// ファイルからテキストを読み込む
+						string text;
+						using (var fs = File.OpenRead(file))
+						{
+							text = ReadTextWithEncodingDetection(file, fs);
+						}
 
-					ProcessText(text);
+						ProcessText(text);
+					}
 				}
 			}
 			currentIndex = 0;
 			DisplayQRCode();
 		}
+
 
 		private void ProcessText(string text)
 		{
